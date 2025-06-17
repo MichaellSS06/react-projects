@@ -6,15 +6,21 @@ import { checkWinner } from './logics/board'
 import { WinnerModal } from './components/WinnerModal'
 
 function App() {
-  const [board, setBoard] = useState(Array(9).fill(null))
+  const [board, setBoard] = useState(()=>{
+    const boardfromStorage= window.localStorage.getItem("board")
+    return boardfromStorage? JSON.parse(boardfromStorage): Array(9).fill(null)})
   
-  const [turn,setTurn] = useState(TURNS.X)
+  const [turn,setTurn] = useState(()=>{
+    const turnFromStorage = window.localStorage.getItem("turn")
+    return turnFromStorage? turnFromStorage :TURNS.X})
   const [winner, setWinner] = useState(null)
 
   const resetGame = ()=>{
     setBoard(Array(9).fill(null))
     setTurn(TURNS.X)
     setWinner(null)
+    window.localStorage.removeItem("board")
+    window.localStorage.removeItem("turn")
   }
 
   const checkEndGame = (newBoard)=>{
@@ -29,7 +35,8 @@ function App() {
     setBoard(newBoard)
     const newTurn = turn === TURNS.X? TURNS.O:TURNS.X
     setTurn(newTurn)
-
+    window.localStorage.setItem("board", JSON.stringify(newBoard))
+    window.localStorage.setItem("turn", newTurn)
     const newWinner=checkWinner(newBoard)
     if(newWinner) {
       setWinner(newWinner)
@@ -41,6 +48,9 @@ function App() {
   return (
     <main className="board">
       <h1>Tic tac toe</h1>
+      <button onClick={resetGame}>
+              Empezar de nuevo
+       </button>
       <section className="game">
         {
           board.map((_,index)=>{
